@@ -1,0 +1,23 @@
+name: Generar index de imágenes
+on:
+  push:
+    paths:
+      - 'imagenes/**'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Generar index.json
+        run: |
+          cd imagenes
+          ls *.jpg *.jpeg *.png *.webp *.JPG *.JPEG *.PNG *.WEBP 2>/dev/null | \
+          python3 -c "import sys,json; print(json.dumps(sorted(sys.stdin.read().split())))" \
+          > index.json
+      - name: Commit index.json
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
+          git add imagenes/index.json
+          git diff --staged --quiet || git commit -m "Actualizar index de imágenes"
+          git push
